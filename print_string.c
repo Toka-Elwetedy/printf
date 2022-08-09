@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include "main.h"
 /**
 * print_string - Prints a string to stdout
@@ -9,10 +8,14 @@
 */
 int printf_string(va_list ap)
 {
-char *string = va_arg(ap, char *);
-int count;
-if (string == NULL)
-string = "(null)";
-count = _puts(string);
-return (count);
+char *t = va_arg(ap, char *);
+int e, ret = 0;
+if (t == NULL)
+t = "(null)";
+for (e = 0; t[e] != '\0'; e++)
+{
+_putchar(t[e]);
+ret++;
+}
+return (ret);
 }
