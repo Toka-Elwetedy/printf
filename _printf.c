@@ -1,58 +1,51 @@
 #include "main.h"
+
 /**
-* op_checker - function that checks if the operator is valid
-* @c: the operator
-* @ap: the argument pointer
-*
-* Return: 1 if the operator is valid, -1 if not
-*/
-int op_checker(char c, va_list ap)
-{
-int i;
-func_t ops[] = {
-{"c", print_char},
-{"s", print_string},
-{"d", print_int},
-{"i", print_int},
-{"%", print_percent},
-{"b", print_binary},
-{NULL, NULL}
-};
-for (i = 0; ops[i].op != NULL; i++)
-{
-if (c == *(ops[i].op))
-{
-return (ops[i].f(ap));
-}
-}
-return (-1);
-}
-/**
-* _printf - Printf function
-* @format: The format of the string
-*
-* Return: The number of characters printed
-*/
+ * _printf - formatted output conversion and print data.
+ * @format: input string.
+ *
+ * Return: number of chars printed.
+ */
 int _printf(const char *format, ...)
 {
-va_list ap;
-int i = 0, ret = 0;
-if (format == NULL)
-return (-1);
-va_start(ap, format);
-while (format[i] != '\0')
-{
-if (format[i] == '%')
-{
-i++;
-ret += op_checker(format[i], ap);
-else
-{
-_putchar(format[i]);
-ret++;
-}
-i++;
-}
-va_end(ap);
-return (ret);
+	unsigned int i = 0, len = 0, ibuf = 0;
+	va_list arguments;
+	int (*function)(va_list, char *, unsigned int);
+	char *buffer;
+
+	va_start(arguments, format), buffer = malloc(sizeof(char) * 1024);
+	if (!format || !buffer || (format[i] == '%' && !format[i + 1]))
+		return (-1);
+	if (!format[i])
+		return (0);
+	for (i = 0; format && format[i]; i++)
+	{
+		if (format[i] == '%')
+		{
+			if (format[i + 1] == '\0')
+			{	print_buf(buffer, ibuf), free(buffer), va_end(arguments);
+				return (-1);
+			}
+			else
+			{	function = get_print_func(format, i + 1);
+				if (function == NULL)
+				{
+					if (format[i + 1] == ' ' && !format[i + 2])
+						return (-1);
+					handl_buf(buffer, format[i], ibuf), len++, i--;
+				}
+				else
+				{
+					len += function(arguments, buffer, ibuf);
+					i += ev_print_func(format, i + 1);
+				}
+			} i++;
+		}
+		else
+			handl_buf(buffer, format[i], ibuf), len++;
+		for (ibuf = len; ibuf > 1024; ibuf -= 1024)
+			;
+	}
+	print_buf(buffer, ibuf), free(buffer), va_end(arguments);
+	return (len);
 }
